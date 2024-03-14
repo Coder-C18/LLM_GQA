@@ -6,11 +6,8 @@ collection_name = "example_collection"
 client = QdrantClient("localhost", port=6333)
 GEMINI_API_KEY = "AIzaSyCieu0Mua9b0gjo-RbIGi-bTJGYlwzVN1U"  # add your key here
 gemini_client.configure(api_key=GEMINI_API_KEY)
-
-
-while True:
-
-    question = input("Enter question: ")
+def QA_Gemini(question):
+    print(question)
     t = client.search(
         collection_name='docx',
         query_vector=gemini_client.embed_content(
@@ -34,5 +31,4 @@ while True:
     """
 
     output = gemini_client.GenerativeModel('gemini-pro').generate_content(prompt).text
-
-    print("Bot :",output)
+    return output
