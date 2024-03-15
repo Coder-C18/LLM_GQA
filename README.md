@@ -19,6 +19,11 @@ Clone repo and install requirements.txt in a Python>=3.8.0 environment
 ```commandline
 pip install -r requirements.txt
 ```
+```commandline
+python GUI.py
+```
+
+
 
 install PyQt6,pip install pyqt6-tools, PyQt5Designer
 pyuic6 -x .\untitled.ui -o vd1.py

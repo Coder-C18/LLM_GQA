@@ -4,12 +4,12 @@ from qdrant_client import QdrantClient
 
 collection_name = "example_collection"
 client = QdrantClient("localhost", port=6333)
-GEMINI_API_KEY = "AIzaSyCieu0Mua9b0gjo-RbIGi-bTJGYlwzVN1U"  # add your key here
+GEMINI_API_KEY = "AIzaSyCwLQ2WHU7aSfhDxOM-MxQNHLtOsp4jyQk"  # add your key here
 gemini_client.configure(api_key=GEMINI_API_KEY)
-def QA_Gemini(question):
+def QA_Gemini(question,collection_name):
     print(question)
     t = client.search(
-        collection_name='docx',
+        collection_name=collection_name,
         query_vector=gemini_client.embed_content(
             model="models/embedding-001",
             content=question,
