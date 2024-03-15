@@ -166,6 +166,8 @@ class Ui_Dialog(object):
         file = QtWidgets.QFileDialog.getOpenFileName(self.pushButton.parentWidget(), "Open File", 'D:',
                                                      "Documents(*.docx *.pdf)")
         self.textBrowser.setText(file[0])
+        self.progressBar.hide()
+        self.progressBar.setValue(0)
 
     def insert_file(self):
         file_path = self.textBrowser.toPlainText()
