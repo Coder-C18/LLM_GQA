@@ -1,5 +1,5 @@
 from PyQt6 import QtCore, QtWidgets
-from db_vector import QA_Gemini, get_list_collection_name, insert_db
+from LLM_model.db_vector import QA_Gemini, get_list_collection_name, insert_db
 from langchain_community.document_loaders import Docx2txtLoader
 
 from qdrant_client import QdrantClient
