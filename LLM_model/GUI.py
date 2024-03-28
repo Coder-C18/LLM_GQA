@@ -1,15 +1,10 @@
-import time
-from PyQt6 import QtCore,QtWidgets
-from db_vector import QA_Gemini
+from PyQt6 import QtCore, QtWidgets
+from db_vector import QA_Gemini, get_list_collection_name, insert_db
 from langchain_community.document_loaders import Docx2txtLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from qdrant_client import QdrantClient
-import google.generativeai as gemini_client
-from qdrant_client.http.models import Distance, PointStruct, VectorParams
 
-GEMINI_API_KEY = "AIzaSyCieu0Mua9b0gjo-RbIGi-bTJGYlwzVN1U"  # add your key here
+from qdrant_client import QdrantClient
+
 client = QdrantClient("localhost", port=6333)
-gemini_client.configure(api_key=GEMINI_API_KEY)
 
 
 class WorkerThread(QtCore.QThread):
@@ -22,7 +17,11 @@ class WorkerThread(QtCore.QThread):
     def run(self):
         # This is the function that will run on the background thread
         self.update_signal.emit(f"Count")
+
+
 from PyQt6.QtCore import Qt
+
+
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -45,7 +44,6 @@ class TableModel(QtCore.QAbstractTableModel):
         return len(self._data[0])
 
 
-
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -56,12 +54,9 @@ class Ui_Dialog(object):
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("Q&A")
 
-
         self.cbbox = QtWidgets.QComboBox(parent=self.tab)
-        self.cbbox.setGeometry(QtCore.QRect(20, 10,200, 20))
+        self.cbbox.setGeometry(QtCore.QRect(20, 10, 200, 20))
         self.cbbox.setObjectName("cbbox")
-
-
 
         self.textBrowser_2 = QtWidgets.QTextBrowser(parent=self.tab)
         self.textBrowser_2.setGeometry(QtCore.QRect(20, 60, 941, 500))
@@ -80,11 +75,8 @@ class Ui_Dialog(object):
         self.tableView.setGeometry(QtCore.QRect(20, 240, 971, 491))
         self.tableView.setObjectName("tableView")
 
-
-
         # Inserting data into the model
         self.view_collections()
-
 
         self.frame = QtWidgets.QFrame(parent=self.tab_2)
         self.frame.setGeometry(QtCore.QRect(10, 0, 981, 171))
@@ -92,20 +84,16 @@ class Ui_Dialog(object):
         self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
         self.frame.setObjectName("frame")
 
-        self.progressBar = QtWidgets.QProgressBar(parent=self.frame)
-        self.progressBar.setGeometry(QtCore.QRect(10, 130, 791, 23))
-        self.progressBar.setProperty("value", 24)
-        self.progressBar.setObjectName("progressBar")
-        self.progressBar.hide()
+        # self.progressBar = QtWidgets.QProgressBar(parent=self.frame)
+        # self.progressBar.setGeometry(QtCore.QRect(10, 130, 791, 23))
+        # self.progressBar.setProperty("value", 24)
+        # self.progressBar.setObjectName("progressBar")
+        # self.progressBar.hide()
 
         self.pushButton = QtWidgets.QPushButton(parent=self.frame)
         self.pushButton.setGeometry(QtCore.QRect(10, 70, 131, 41))
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.insert_file)
-
-        self.pushButton_3 = QtWidgets.QPushButton(parent=self.frame)
-        self.pushButton_3.setGeometry(QtCore.QRect(160, 70, 151, 41))
-        self.pushButton_3.setObjectName("pushButton_3")
 
         self.textBrowser = QtWidgets.QTextBrowser(parent=self.frame)
         self.textBrowser.setGeometry(QtCore.QRect(10, 20, 641, 31))
@@ -126,25 +114,20 @@ class Ui_Dialog(object):
         self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-
     def view_collections(self):
-
-        x = client.get_collections()
-        self.cbbox.addItems([i.name for i in x.collections])
-        x = [[i.name] for i in x.collections]
+        collection_names = get_list_collection_name()
+        self.cbbox.addItems(collection_names)
+        x = [[i, name] for i, name in enumerate(collection_names)]
         self.tableView.setModel(TableModel(x))
-
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Dialog", "Tab 1"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Dialog", "Bot"))
         self.pushButton.setText(_translate("Dialog", "Insert Document"))
-        self.pushButton_3.setText(_translate("Dialog", "Cancel insert"))
         self.pushButton_2.setText(_translate("Dialog", "Browser"))
         self.pushButton_4.setText(_translate("Dialog", "Delete"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Dialog", "Tab 2"))
-
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Dialog", "Manager"))
 
     def gen_answer(self):
         text_input = self.textEdit.text()
@@ -153,7 +136,7 @@ class Ui_Dialog(object):
 
         def gen():
             collection_name = self.cbbox.currentText()
-            answer = QA_Gemini(text_input,collection_name)
+            answer = QA_Gemini(text_input, collection_name)
             print("dang tra loi ")
             self.textBrowser_2.setText(self.textBrowser_2.toPlainText() + "\n" + f'Bot: {answer}')
 
@@ -161,61 +144,19 @@ class Ui_Dialog(object):
         self.worker_thread.update_signal.connect(gen)
         self.worker_thread.start()
 
-
     def select_file(self):
         file = QtWidgets.QFileDialog.getOpenFileName(self.pushButton.parentWidget(), "Open File", 'D:',
                                                      "Documents(*.docx *.pdf)")
         self.textBrowser.setText(file[0])
-        self.progressBar.hide()
-        self.progressBar.setValue(0)
+        # self.progressBar.hide()
+        # self.progressBar.setValue(0)
 
     def insert_file(self):
         file_path = self.textBrowser.toPlainText()
         collection_name = file_path.split('/')[-1]
-        print(file_path)
-        print(collection_name)
-
         loader = Docx2txtLoader(file_path)
         pages = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=2048, chunk_overlap=512)
-
-        docs = text_splitter.split_documents(pages)
-
-        document_chunks = [chunk.page_content for chunk in docs]
-
-        results = []
-        t = 1
-        self.progressBar.show()
-        for index in range(len(document_chunks)):
-            print(index)
-
-            emb = gemini_client.embed_content(
-                model="models/embedding-001",
-                content=document_chunks[index],
-                task_type="retrieval_document",
-                title="Qdrant x Gemini",
-            )['embedding']
-            results.append(emb)
-            if t % 60 == 0:
-                time.sleep(60)
-            t += 1
-            self.progressBar.setProperty('value', round(((index + 1) / len(document_chunks)) * 100))
-
-        points = [
-            PointStruct(
-                id=idx,
-                vector=response,
-                payload={"text": text},
-            )
-            for idx, (response, text) in enumerate(zip(results, document_chunks))
-        ]
-        client.create_collection(collection_name, vectors_config=
-        VectorParams(
-            size=768,
-            distance=Distance.COSINE,
-        )
-                                )
-        client.upsert(collection_name, points)
+        insert_db(pages, collection_name)
         self.view_collections()
 
 
