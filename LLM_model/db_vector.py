@@ -1,3 +1,4 @@
+from langchain_community.document_loaders.word_document import Docx2txtLoader
 from qdrant_client import QdrantClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from LLM import gemini_client
@@ -41,10 +42,13 @@ def get_list_collection_name():
     return [i.name for i in collections.collections]
 
 
-def insert_db(text, collection_name):
+def insert_db(file_path, collection_name):
+    loader = Docx2txtLoader(file_path)
+    pages = loader.load()
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=2048, chunk_overlap=512)
 
-    docs = text_splitter.split_documents(text)
+    docs = text_splitter.split_documents(pages)
 
     document_chunks = [chunk.page_content for chunk in docs]
 

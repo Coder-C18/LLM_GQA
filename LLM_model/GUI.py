@@ -154,9 +154,7 @@ class Ui_Dialog(object):
     def insert_file(self):
         file_path = self.textBrowser.toPlainText()
         collection_name = file_path.split('/')[-1]
-        loader = Docx2txtLoader(file_path)
-        pages = loader.load()
-        insert_db(pages, collection_name)
+        insert_db(file_path, collection_name)
         self.view_collections()
 
 
