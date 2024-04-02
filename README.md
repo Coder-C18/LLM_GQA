@@ -2,11 +2,20 @@
 <h1>Pipe Line Q&A Document use LLM</h1>
 <p> I implement pipeline product following :
 </p>
-<img src="https://raw.githubusercontent.com/Coder-C18/LLM_GQA/main/images/e26865ad-752e-4075-910a-d86a8cc1bdbc.jpg">
+<img src="https://raw.githubusercontent.com/Coder-C18/LLM_GQA/main/images/pipe line.jpg">
 
 
 <h1> Install Qdrant Database</h1>
 
+
+<h2>Requirement</h2>
+* ### LLM : Gemini
+* ### Vector Database :qdrant
+* ### Python : >3.8
+
+
+
+# Install Qdrant using docker
 ```commandline
 docker pull qdrant/qdrant
 ```
@@ -23,7 +32,3 @@ pip install -r requirements.txt
 python GUI.py
 ```
 
-
-
-install PyQt6,pip install pyqt6-tools, PyQt5Designer
-pyuic6 -x .\untitled.ui -o vd1.py

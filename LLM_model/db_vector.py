@@ -55,6 +55,7 @@ def insert_db(file_path, collection_name):
     results = []
     t = 1
     for index in range(len(document_chunks)):
+        print(index)
         emb = gemini_client.embed_content(
             model="models/embedding-001",
             content=document_chunks[index],
